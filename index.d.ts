@@ -172,6 +172,20 @@ declare module 'mineflayer-pathfinder' {
 		export class GoalBreakBlock extends GoalLookAtBlock {}
 	}
 
+	export class BlockReplacer {
+		public constructor( mcData: IndexedData );
+
+		public allowed: boolean;
+		public included: Set<{ block: string, replaceWith: string }>
+		public excluded: Set<string>
+
+		public allowReplacing( state: boolean ): BlockReplacer;
+		public includeAll(): BlockReplacer;
+		public excludeAll(): BlockReplacer;
+		public include( ...blocks: string | { block: string, replaceWith: string } ): BlockReplacer;
+		public exclude( ...blocks: string ): BlockReplacer;
+	}
+
 	export class Movements {
 		public constructor(bot: Bot, mcData: IndexedData);
 
@@ -190,6 +204,8 @@ declare module 'mineflayer-pathfinder' {
 		public liquids: Set<number>;
 		public gravityBlocks: Set<number>;
 		public scafoldingBlocks: number[];
+
+		public brokenBlocksReplacer: BlockReplacer
 
 		public maxDropDown: number;
 		public digCost: number;

@@ -391,16 +391,29 @@ function inject (bot) {
       if (!digging && bot.entity.onGround) {
         digging = true
         const b = nextPoint.toBreak.shift()
-        const block = bot.blockAt(new Vec3(b.x, b.y, b.z), false)
+        const blockPosition = new Vec3(b.x, b.y, b.z);
+        const block = bot.blockAt( blockPosition, false)
         const tool = bot.pathfinder.bestHarvestTool(block)
         fullStop()
-
+        
         const digBlock = () => {
           bot.dig(block)
-            .catch(_ignoreError => {
-              resetPath('dig_error')
-            })
-            .then(function () {
+          .catch(_ignoreError => {
+            resetPath('dig_error')
+          })
+          .then(function () {
+              const placeBlock = stateMovements.brokenBlocksReplacer.replacebrokenBlock( blockPosition, block.name );
+              if ( placeBlock ) {
+                if ( path[1] ) {
+                  path[1].toPlace.push({
+                    ...placeBlock.position,
+                    dx: placeBlock.delta.x,
+                    dy: placeBlock.delta.y,
+                    dz: placeBlock.delta.z
+                  })
+                }
+              }
+
               lastNodeTime = performance.now()
               digging = false
             })
@@ -483,6 +496,10 @@ function inject (bot) {
     if (Math.abs(dx) <= 0.35 && Math.abs(dz) <= 0.35 && Math.abs(dy) < 1) {
       // arrived at next point
       lastNodeTime = performance.now()
+
+      stateMovements.brokenBlocksReplacer.broken
+        .forEach( brokenBlocks => nextPoint.toPlace.push(  ) )
+
       if (stopPathing) {
         stop()
         return
